@@ -78,5 +78,5 @@ Copy Batch 1's pattern. Two groups: single-image editing, and text/detail genera
 | Capability | Status |
 |---|---|
 | Batch 1 — image generation | ✅ live |
-| Batch 1 — room cleaning / erase / replace | 📋 planned — start here |
+| Batch 1 — room cleaning / erase / replace | 🔧 implemented — pending deploy & verify |
 | Batch 2–3 | 📋 planned |

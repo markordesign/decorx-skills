@@ -1,6 +1,6 @@
 ---
 name: decorx-tool
-description: DecorX design tools — AI interior design via the DecorX API. Supports image generation (text-to-image & image-to-image: generate/render/redesign/reimagine rooms) and room cleaning (empty a furnished room into a bare room — remove all furniture/objects). More capabilities added over time.
+description: DecorX design tools — AI interior design via the DecorX API. Supports image generation (text-to-image & image-to-image: generate/render/redesign/reimagine rooms), room cleaning (empty a furnished room into a bare room), and region erase/replace (remove or swap a specific object in a photo by naming it — e.g. "erase the sofa", "replace the lamp with a plant"). More capabilities added over time.
 ---
 
 # DecorX Tool
@@ -122,6 +122,55 @@ Remove all furniture and objects from a room photo, returning an empty/bare room
 - Reuses the same `/upload` and `/check` endpoints as image generation — only the submit endpoint differs.
 - `image_url` is publicly accessible (no auth) — don't use for private imagery.
 - Currently free; credit consumption may be enabled later.
+
+### Erase regions
+
+Erase a specific object from a photo by naming it. The backend finds the object via segmentation and removes it — you do NOT supply a mask, just a text `target`.
+
+#### Endpoint
+
+`POST {base_url}/decorx/open/image/erase`
+- Header: `X-API-Key`
+- Body (JSON):
+  - `image_url` (string, required) — public image URL or `refid`
+  - `target` (string, required) — what to erase. Use an **English object noun** for best detection (`"sofa"`, `"lamp"`, `"chair"`, `"plant"`, …).
+- Response `val.status`: `succeeded` → `val.image_url`; `pending` → `val.taskid` (poll `/decorx/open/image/check`); error → `errmsg`
+
+#### Workflow
+
+1. Read `api_key`/`base_url` from `~/.decorx/skill.json`.
+2. Local image → upload via `/decorx/open/image/upload` to get `refid`; else use the public URL.
+3. Call erase with `{ "image_url": <url|refid>, "target": "sofa" }`.
+4. Poll `/decorx/open/image/check` with `taskid` if `pending`.
+5. Return `val.image_url`.
+
+#### Notes
+
+- If `target` isn't detected the task fails — rephrase to a simpler English noun and retry.
+- Mask is bbox-based; edges may need a follow-up. Output `.jpg`, public URL.
+
+### Replace regions
+
+Replace a specific object in a photo with something else — name the object and describe the replacement. Same auto-mask pipeline as erase.
+
+#### Endpoint
+
+`POST {base_url}/decorx/open/image/replace`
+- Header: `X-API-Key`
+- Body (JSON):
+  - `image_url` (string, required) — public image URL or `refid`
+  - `target` (string, required) — object to replace (English noun, e.g. `"sofa"`)
+  - `replace_prompt` (string, required) — what should appear instead (e.g. `"a navy linen 3-seater sofa with brass legs"`)
+- Response `val.status`: `succeeded` → `val.image_url`; `pending` → `val.taskid` (poll `/decorx/open/image/check`); error → `errmsg`
+
+#### Workflow
+
+Same as erase, body adds `replace_prompt`.
+
+#### Notes
+
+- Backend constrains the replacement to roughly the original object's size and preserves everything outside the mask.
+- `.jpg`, public URL.
 
 <!-- Add future DecorX capabilities as new ### sections under Capabilities above. -->
 
