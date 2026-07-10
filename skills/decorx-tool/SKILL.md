@@ -1,6 +1,6 @@
 ---
 name: decorx-tool
-description: DecorX design tools — AI interior design capabilities via the DecorX API. Currently supports image generation (text-to-image and image-to-image): generating, rendering, redesigning, or reimagining interior/room images. More capabilities are added to this skill over time.
+description: DecorX design tools — AI interior design via the DecorX API. Supports image generation (text-to-image & image-to-image: generate/render/redesign/reimagine rooms) and room cleaning (empty a furnished room into a bare room — remove all furniture/objects). More capabilities added over time.
 ---
 
 # DecorX Tool
@@ -91,6 +91,36 @@ Generate interior design images via the DecorX API (text-to-image and image-to-i
 - Generation is synchronous with a ~2 min timeout; long runs return a `taskid` to poll.
 - Output images are `.jpg`.
 - `image_url` is publicly accessible (no auth) — anyone with the URL can view it. Do not use for private content.
+- Currently free; credit consumption may be enabled later.
+
+### Room cleaning
+
+Remove all furniture and objects from a room photo, returning an empty/bare room. Useful before virtual staging or to see the bare space.
+
+#### Endpoint
+
+`POST {base_url}/decorx/open/image/room-cleaning`
+- Header: `X-API-Key`
+- Body (JSON):
+  - `image_url` (string, required) — the room photo to empty. A **public image URL** (`http`/`https`) OR a `refid` from upload.
+- Response `val.status`:
+  - `succeeded` → use `val.image_url` (public URL of the emptied room, `.jpg`)
+  - `pending` → `val.taskid`; wait ~5s and call `/decorx/open/image/check`, repeat up to ~120s
+  - error → read `errmsg`
+
+#### Workflow
+
+1. Read `api_key` (and `base_url` if set) from `~/.decorx/skill.json`.
+2. If the user's image is local (no public URL), upload it first via `/decorx/open/image/upload` to get a `refid`; otherwise use the public URL directly.
+3. Call room-cleaning with `{ "image_url": <url or refid> }`.
+4. If `pending`, poll `/decorx/open/image/check` with the `taskid` until `succeeded` or error (max ~120s).
+5. Return `val.image_url` — a public URL the user can open directly.
+
+#### Notes
+
+- Output matches the input image dimensions; format is `.jpg`.
+- Reuses the same `/upload` and `/check` endpoints as image generation — only the submit endpoint differs.
+- `image_url` is publicly accessible (no auth) — don't use for private imagery.
 - Currently free; credit consumption may be enabled later.
 
 <!-- Add future DecorX capabilities as new ### sections under Capabilities above. -->
