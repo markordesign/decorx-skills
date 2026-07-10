@@ -1,7 +1,7 @@
 {
   "name": "decorx-skills",
-  "version": "0.1.0",
-  "description": "DecorX skills for AI agents (Claude Code, etc.) — install with: npx decorx-skills install image",
+  "version": "0.2.0",
+  "description": "Installer for the decorx-tool skill — DecorX AI design capabilities (image generation today, more over time) for Claude Code and other agents. Install with: npx decorx-skills install",
   "bin": {
     "decorx-skills": "./bin/cli.js"
   },
@@ -15,6 +15,7 @@
   },
   "keywords": [
     "decorx",
+    "decorx-tool",
     "skill",
     "claude-code",
     "ai",

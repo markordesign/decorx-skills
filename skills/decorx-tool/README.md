@@ -1,16 +1,16 @@
-# DecorX Image Skill (Claude Code)
+# decorx-tool (Claude Code skill)
 
-Generate AI interior design images from Claude Code via the DecorX API (text-to-image and image-to-image).
+The DecorX skill for Claude Code — a single, growing bundle of DecorX design capabilities. Today it supports AI interior design image generation (text-to-image and image-to-image); more capabilities will be added to this same skill over time.
 
 ## Install
 
 ```bash
-npx decorx-skills install image
+npx decorx-skills install
 ```
 
-This copies the skill into `~/.claude/skills/decorx-image/`.
+This copies the skill into `~/.claude/skills/decorx-tool/`.
 
-> Local dev without npm publish: `node bin/cli.js install image` from this repo.
+> Local dev without npm publish: `node bin/cli.js install` from this repo.
 
 ## Get an API key
 
@@ -19,13 +19,13 @@ This copies the skill into `~/.claude/skills/decorx-image/`.
 
 ## Configure
 
-Create `~/.decorx/skill.json`:
+The installer created `~/.decorx/skill.json`. Edit it and paste your key:
 
 ```json
 { "api_key": "dxk_...", "base_url": "https://your-decorx-server" }
 ```
 
-- `base_url`: the DecorX server address you log into.
+- `base_url`: the DecorX server address you log into (defaults to `https://pretest.houseofmarkor.com`).
 - This file lives outside any git repo. Do not commit or share it.
 
 ## Use

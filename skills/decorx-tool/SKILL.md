@@ -1,11 +1,11 @@
 ---
-name: decorx-image
-description: Generate AI interior design images via the DecorX API (text-to-image and image-to-image). Use when the user asks to generate, render, redesign, or reimagine interior/room images through DecorX.
+name: decorx-tool
+description: DecorX design tools — AI interior design capabilities via the DecorX API. Currently supports image generation (text-to-image and image-to-image): generating, rendering, redesigning, or reimagining interior/room images. More capabilities are added to this skill over time.
 ---
 
-# DecorX Image Generation
+# DecorX Tool
 
-Generate interior design images via the DecorX API.
+A bundle of DecorX design capabilities, accessed via the DecorX API. Today it supports **image generation** (text-to-image and image-to-image); more capabilities will be added to this same skill over time. Each capability has its own section under **Capabilities** below.
 
 ## Prerequisites
 
@@ -35,11 +35,17 @@ Generate interior design images via the DecorX API.
   (Use the `BASE` from skill.json's `base_url`, or the default `https://pretest.houseofmarkor.com`.)
 - Never `echo`, `print`, or log `$KEY`. Never write the key into any file. If a tool would log command args, redact the key.
 - Parse the JSON response from the same command's stdout; don't persist it to a file unless the user asks.
-- Polling (endpoint 3) = just re-run the check command after ~5s; again, one command each time, no loop script needed unless several minutes pass.
+- Polling (check endpoint) = just re-run the check command after ~5s; again, one command each time, no loop script needed unless several minutes pass.
 
-## Endpoints
+## Capabilities
 
-### 1. Upload an image (only for local images with no public URL)
+### Image generation
+
+Generate interior design images via the DecorX API (text-to-image and image-to-image).
+
+#### Endpoints
+
+**1. Upload an image (only for local images with no public URL)**
 
 `POST {base_url}/decorx/open/image/upload`
 - Header: `X-API-Key`
@@ -48,7 +54,7 @@ Generate interior design images via the DecorX API.
 - Minimum resolution 256x256.
 - Skip this step if the image already has a public URL — pass the URL directly to generate.
 
-### 2. Generate an image
+**2. Generate an image**
 
 `POST {base_url}/decorx/open/image/generate`
 - Header: `X-API-Key`
@@ -63,14 +69,14 @@ Generate interior design images via the DecorX API.
   - `pending` → `val.taskid`; wait ~5s and call endpoint 3, repeat up to ~120s
   - error → read `errmsg`
 
-### 3. Check a pending task
+**3. Check a pending task**
 
 `POST {base_url}/decorx/open/image/check`
 - Header: `X-API-Key`
 - Body (JSON): `taskid`
 - Response shape same as generate.
 
-## Workflow
+#### Workflow
 
 1. If `~/.decorx/skill.json` is missing or has no `api_key`: ask the user to create a key in DecorX Settings → API Keys and save it to that file. Do NOT proceed without a key.
 2. Read `api_key` from `~/.decorx/skill.json`. Use `base_url` from the file if present, otherwise the default `https://pretest.houseofmarkor.com`.
@@ -79,13 +85,15 @@ Generate interior design images via the DecorX API.
 5. If generate returns `pending`, wait ~5s, call check with the `taskid`; repeat until `succeeded` or error (max ~120s).
 6. Return `image_url` to the user. It is a public URL; the user can open it directly.
 
-## Limitations
+#### Limitations
 
 - Only the FIRST generated image is returned even if `num_images > 1`.
 - Generation is synchronous with a ~2 min timeout; long runs return a `taskid` to poll.
 - Output images are `.jpg`.
 - `image_url` is publicly accessible (no auth) — anyone with the URL can view it. Do not use for private content.
 - Currently free; credit consumption may be enabled later.
+
+<!-- Add future DecorX capabilities as new ### sections under Capabilities above. -->
 
 ## Security
 
