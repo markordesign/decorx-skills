@@ -1,0 +1,31 @@
+{
+  "name": "decorx-skills",
+  "version": "0.1.0",
+  "description": "DecorX skills for AI agents (Claude Code, etc.) — install with: npx decorx-skills install image",
+  "bin": {
+    "decorx-skills": "./bin/cli.js"
+  },
+  "type": "module",
+  "files": [
+    "bin",
+    "skills"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "decorx",
+    "skill",
+    "claude-code",
+    "ai",
+    "interior-design",
+    "image-generation"
+  ],
+  "author": "DecorX",
+  "license": "MIT",
+  "homepage": "https://pretest.houseofmarkor.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markordesign/decorx-skills"
+  }
+}
