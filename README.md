@@ -1,22 +1,45 @@
 # decorx-skills
 
-Installer for the **decorx-tool** skill — DecorX's AI design capabilities for Claude Code (and other agents that load skills from `~/.claude/skills/`).
+Installer for the **decorx-tool** skill — DecorX's AI design capabilities for any SKILL.md-compatible agent: **Claude Code, Codex, OpenCode, Cursor**, and more.
 
 `decorx-tool` is a single, growing skill that bundles DecorX's capabilities. Today it does **interior design image generation** (text-to-image and image-to-image); more capabilities will be added to the same skill over time — you install once, and it grows with DecorX.
 
 ## Quick start
 
 ```bash
-# via GitHub (no npm account needed)
+# via GitHub (no npm account needed) — auto-detects installed agents
 npx --yes github:markordesign/decorx-skills install
 
 # or, once published to npm:
 npx decorx-skills install
 ```
 
-This installs the `decorx-tool` skill into `~/.claude/skills/decorx-tool/` and creates a config template at `~/.decorx/skill.json`.
+Auto-detect installs into every agent it finds on your machine. To target one explicitly:
+
+```bash
+npx decorx-skills install --claude     # Claude Code
+npx decorx-skills install --codex      # Codex
+npx decorx-skills install --opencode   # OpenCode
+npx decorx-skills install --cursor     # Cursor
+npx decorx-skills install --all        # all of the above
+```
+
+This installs the `decorx-tool` skill and creates a config template at `~/.decorx/skill.json`.
 
 > Replace `markordesign/decorx-skills` with your actual GitHub `owner/repo` if different.
+
+## Supported agents
+
+The skill uses the open `SKILL.md` standard, so one skill works everywhere. Each agent has its own skill directory:
+
+| Agent | Skill directory |
+|---|---|
+| Claude Code | `~/.claude/skills/` |
+| Codex | `~/.agents/skills/` |
+| OpenCode | `~/.config/opencode/skills/` |
+| Cursor | `~/.cursor/skills/` (also auto-reads `~/.claude` & `~/.agents`) |
+
+All four support natural-language auto-triggering from the skill's `description` — no manual slash command needed.
 
 ## 1. Get an API key
 
@@ -37,7 +60,7 @@ The installer already created `~/.decorx/skill.json`. Edit it and paste your key
 
 ## 3. Use
 
-In Claude Code, just describe what you want:
+In your agent, just describe what you want:
 
 > Generate a Scandinavian living room render, warm natural light, oak furniture.
 
@@ -69,6 +92,7 @@ Local images without a public URL are uploaded automatically; you can also pass 
 
 - Node.js ≥ 18
 - A DecorX account + API key
+- At least one supported agent installed
 
 ## Security
 
@@ -82,11 +106,11 @@ Local images without a public URL are uploaded automatically; you can also pass 
 ```bash
 git clone https://github.com/markordesign/decorx-skills
 cd decorx-skills
-node bin/cli.js install   # install from this checkout
+node bin/cli.js install   # install from this checkout (auto-detects agents)
 ```
 
 - The skill lives in `skills/decorx-tool/SKILL.md` — add a new capability as a new section there.
-- The installer is `bin/cli.js`.
+- The installer is `bin/cli.js` — supported agents are listed in the `TARGETS` map; add another (e.g. Windsurf, Gemini CLI) by adding one line.
 
 ## License
 

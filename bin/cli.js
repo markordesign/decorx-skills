@@ -1,7 +1,12 @@
 #!/usr/bin/env node
-// DecorX skill installer: installs the `decorx-tool` skill into ~/.claude/skills/
-// and creates a ~/.decorx/skill.json config template on first run.
-// Usage: decorx-skills install   (or just `decorx-skills`)
+// decorx-tool skill installer — installs the skill into one or more AI agents' skill dirs.
+// Usage:
+//   decorx-skills install              # auto-detect installed agents and install to all of them
+//   decorx-skills install --claude     # only Claude Code   (~/.claude/skills)
+//   decorx-skills install --codex      # only Codex         (~/.agents/skills)
+//   decorx-skills install --opencode   # only OpenCode      (~/.config/opencode/skills)
+//   decorx-skills install --cursor     # only Cursor        (~/.cursor/skills)
+//   decorx-skills install --all        # install to every supported agent
 import { cpSync, mkdirSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -9,11 +14,33 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_SRC = join(__dirname, '..', 'skills', 'decorx-tool'); // bundled with the npm package
-const CLAUDE_DIR = join(homedir(), '.claude', 'skills');
-const DEST = join(CLAUDE_DIR, 'decorx-tool');
-const DECORX_DIR = join(homedir(), '.decorx');
+const SKILL_NAME = 'decorx-tool';
+const LEGACY_NAME = 'decorx-image';
+const HOME = homedir();
+const DECORX_DIR = join(HOME, '.decorx');
 
-const [, , cmd] = process.argv;
+// agent target -> { skillsDir: where the skill folder goes; detectDir: presence implies the agent is installed }
+const TARGETS = {
+  claude:   { skillsDir: join(HOME, '.claude', 'skills'),             detectDir: join(HOME, '.claude') },
+  codex:    { skillsDir: join(HOME, '.agents', 'skills'),             detectDir: join(HOME, '.codex') },
+  opencode: { skillsDir: join(HOME, '.config', 'opencode', 'skills'), detectDir: join(HOME, '.config', 'opencode') },
+  cursor:   { skillsDir: join(HOME, '.cursor', 'skills'),             detectDir: join(HOME, '.cursor') },
+};
+
+const args = process.argv.slice(2);
+const cmd = args[0];
+
+function installTo(skillsDir) {
+  const dest = join(skillsDir, SKILL_NAME);
+  mkdirSync(skillsDir, { recursive: true });
+  if (existsSync(dest)) rmSync(dest, { recursive: true, force: true });
+  cpSync(SKILL_SRC, dest, { recursive: true });
+  // clean up legacy skill name in this same directory (one-time migration from decorx-image)
+  const legacy = join(skillsDir, LEGACY_NAME);
+  const hadLegacy = existsSync(legacy);
+  if (hadLegacy) rmSync(legacy, { recursive: true, force: true });
+  return { dest, hadLegacy };
+}
 
 if (cmd === 'install' || cmd === undefined) {
   if (!existsSync(SKILL_SRC)) {
@@ -21,22 +48,31 @@ if (cmd === 'install' || cmd === undefined) {
     process.exit(1);
   }
 
-  // 1. 复制 skill 到 ~/.claude/skills/decorx-tool/（覆盖式更新）
-  mkdirSync(CLAUDE_DIR, { recursive: true });
-  if (existsSync(DEST)) {
-    rmSync(DEST, { recursive: true, force: true });
-  }
-  cpSync(SKILL_SRC, DEST, { recursive: true });
-  console.log(`Installed decorx-tool -> ${DEST}`);
-
-  // 2. 清理旧版 skill 名 decorx-image（历史遗留，一次性迁移，避免重复 skill）
-  const legacy = join(CLAUDE_DIR, 'decorx-image');
-  if (existsSync(legacy)) {
-    rmSync(legacy, { recursive: true, force: true });
-    console.log(`Removed legacy skill: ${legacy}`);
+  const flags = args.filter((a) => a.startsWith('--'));
+  let keys;
+  if (flags.includes('--all')) {
+    keys = Object.keys(TARGETS);
+  } else {
+    const named = flags.filter((f) => f.slice(2) in TARGETS).map((f) => f.slice(2));
+    keys = named.length
+      ? named
+      : Object.entries(TARGETS).filter(([, t]) => existsSync(t.detectDir)).map(([k]) => k);
   }
 
-  // 3. 首次安装创建 ~/.decorx/skill.json 模板（用 homedir()，跨平台路径正确；已存在不覆盖）
+  if (!keys.length) {
+    console.error('No agents detected on this machine. Re-run with one of: --claude, --codex, --opencode, --cursor, or --all.');
+    process.exit(1);
+  }
+
+  let cleanedLegacy = false;
+  for (const k of keys) {
+    const { dest, hadLegacy } = installTo(TARGETS[k].skillsDir);
+    console.log(`[${k}] Installed ${SKILL_NAME} -> ${dest}`);
+    if (hadLegacy) cleanedLegacy = true;
+  }
+  if (cleanedLegacy) console.log(`(Removed legacy skill '${LEGACY_NAME}' where it was present.)`);
+
+  // config is shared across all agents
   const skillJsonPath = join(DECORX_DIR, 'skill.json');
   if (!existsSync(skillJsonPath)) {
     mkdirSync(DECORX_DIR, { recursive: true });
@@ -47,5 +83,5 @@ if (cmd === 'install' || cmd === undefined) {
   }
   console.log('Get an api key from DecorX(https://canvas.decorx.com) → Settings → API Keys.');
 } else {
-  console.log('Usage: decorx-skills install   (installs the decorx-tool skill)');
+  console.log('Usage: decorx-skills install [--claude|--codex|--opencode|--cursor|--all]');
 }

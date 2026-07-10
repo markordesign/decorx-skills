@@ -1,14 +1,15 @@
-# decorx-tool (Claude Code skill)
+# decorx-tool (agent skill)
 
-The DecorX skill for Claude Code — a single, growing bundle of DecorX design capabilities. Today it supports AI interior design image generation (text-to-image and image-to-image); more capabilities will be added to this same skill over time.
+The DecorX skill — a single, growing bundle of DecorX design capabilities. Today it supports AI interior design image generation (text-to-image and image-to-image); more capabilities will be added to this same skill over time. Works with any SKILL.md-compatible agent (Claude Code, Codex, OpenCode, Cursor, …).
 
 ## Install
 
 ```bash
-npx decorx-skills install
+npx decorx-skills install            # auto-detect installed agents
+npx decorx-skills install --claude   # or target one explicitly: --codex / --opencode / --cursor / --all
 ```
 
-This copies the skill into `~/.claude/skills/decorx-tool/`.
+Installs into each agent's skill directory (e.g. `~/.claude/skills/decorx-tool/`, `~/.agents/skills/decorx-tool/`, …).
 
 > Local dev without npm publish: `node bin/cli.js install` from this repo.
 
@@ -30,7 +31,7 @@ The installer created `~/.decorx/skill.json`. Edit it and paste your key:
 
 ## Use
 
-In Claude Code, ask something like:
+In your agent, ask something like:
 
 > Generate a Scandinavian living room render, warm natural light.
 
