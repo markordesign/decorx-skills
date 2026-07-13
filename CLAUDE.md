@@ -10,8 +10,9 @@ A skill-distribution npm package (`decorx-skills`), not an application. Users ru
 
 - **Test the installer locally** (no npm publish needed): `node bin/cli.js install` — auto-detects installed agents, copies `skills/decorx-tool/` into each one's skill dir, creates `~/.decorx/skill.json` if absent.
 - Target a specific agent: `node bin/cli.js install --claude` (also `--codex`, `--opencode`, `--cursor`, or `--all`).
+- Uninstall: `node bin/cli.js uninstall` (also `--<agent>`, `--all`; same target resolution as install). Leaves `~/.decorx/skill.json` in place.
 - Print usage: `node bin/cli.js`.
-- End-user entrypoint after publish: `npx decorx-skills install`.
+- End-user entrypoint after publish: `npx decorx-skills install` (or `npx decorx-skills uninstall`).
 
 ## Architecture
 

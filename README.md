@@ -2,7 +2,7 @@
 
 Installer for the **decorx-tool** skill — DecorX's AI design capabilities for any SKILL.md-compatible agent: **Claude Code, Codex, OpenCode, Cursor**, and more.
 
-`decorx-tool` is a single, growing skill that bundles DecorX's capabilities. Today it does **interior design image generation** (text-to-image and image-to-image); more capabilities will be added to the same skill over time — you install once, and it grows with DecorX.
+`decorx-tool` is a single, growing skill that bundles DecorX's capabilities. Today it covers **image generation** (text-to-image & image-to-image), **room cleaning** (empty a furnished room), and **region erase/replace** (remove or swap a named object in a photo); more capabilities will be added to the same skill over time — you install once, and it grows with DecorX.
 
 ## Quick start
 
@@ -27,6 +27,15 @@ npx decorx-skills install --all        # all of the above
 This installs the `decorx-tool` skill and creates a config template at `~/.decorx/skill.json`.
 
 > Replace `markordesign/decorx-skills` with your actual GitHub `owner/repo` if different.
+
+## Uninstall
+
+```bash
+npx decorx-skills uninstall            # remove from all detected agents
+npx decorx-skills uninstall --claude   # or target one: --codex / --opencode / --cursor / --all
+```
+
+This removes the `decorx-tool` skill folder from each agent's skill directory. It leaves `~/.decorx/skill.json` (your API key) untouched — delete that file manually if you no longer need it.
 
 ## Supported agents
 
@@ -83,10 +92,14 @@ Local images without a public URL are uploaded automatically; you can also pass 
 
 `decorx-tool` bundles multiple DecorX capabilities in one skill:
 
-| Capability | Status | Description |
-|---|---|---|
-| Image generation | available | text-to-image & image-to-image interior renders |
-| _more_ | planned | additional DecorX design capabilities over time |
+| Capability | What it does |
+|---|---|
+| Image generation | text-to-image & image-to-image interior renders |
+| Room cleaning | empty a furnished room into a bare room |
+| Erase regions | remove a named object from a photo (e.g. "erase the sofa") |
+| Replace regions | swap a named object for something else (e.g. "replace the lamp with a plant") |
+
+All capabilities return a public image URL. More will be added over time — you install once and the skill grows with DecorX.
 
 ## Requirements
 

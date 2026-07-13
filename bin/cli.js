@@ -7,6 +7,9 @@
 //   decorx-skills install --opencode   # only OpenCode      (~/.config/opencode/skills)
 //   decorx-skills install --cursor     # only Cursor        (~/.cursor/skills)
 //   decorx-skills install --all        # install to every supported agent
+//   decorx-skills uninstall            # auto-detect installed agents and remove from all of them
+//   decorx-skills uninstall --claude   # remove from one agent
+//   decorx-skills uninstall --all      # remove from every supported agent
 import { cpSync, mkdirSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -42,22 +45,32 @@ function installTo(skillsDir) {
   return { dest, hadLegacy };
 }
 
+function uninstallTo(skillsDir) {
+  const dest = join(skillsDir, SKILL_NAME);
+  if (!existsSync(dest)) return { dest, wasRemoved: false };
+  rmSync(dest, { recursive: true, force: true });
+  return { dest, wasRemoved: true };
+}
+
+// Resolve which agent targets an install/uninstall acts on.
+// --all forces every target; one or more --<agent> flags pick named ones;
+// otherwise auto-detect every agent installed on this machine.
+function resolveTargets(args) {
+  const flags = args.filter((a) => a.startsWith('--'));
+  if (flags.includes('--all')) return Object.keys(TARGETS);
+  const named = flags.filter((f) => f.slice(2) in TARGETS).map((f) => f.slice(2));
+  return named.length
+    ? named
+    : Object.entries(TARGETS).filter(([, t]) => existsSync(t.detectDir)).map(([k]) => k);
+}
+
 if (cmd === 'install' || cmd === undefined) {
   if (!existsSync(SKILL_SRC)) {
     console.error('Skill source not found:', SKILL_SRC);
     process.exit(1);
   }
 
-  const flags = args.filter((a) => a.startsWith('--'));
-  let keys;
-  if (flags.includes('--all')) {
-    keys = Object.keys(TARGETS);
-  } else {
-    const named = flags.filter((f) => f.slice(2) in TARGETS).map((f) => f.slice(2));
-    keys = named.length
-      ? named
-      : Object.entries(TARGETS).filter(([, t]) => existsSync(t.detectDir)).map(([k]) => k);
-  }
+  const keys = resolveTargets(args);
 
   if (!keys.length) {
     console.error('No agents detected on this machine. Re-run with one of: --claude, --codex, --opencode, --cursor, or --all.');
@@ -82,6 +95,25 @@ if (cmd === 'install' || cmd === undefined) {
     console.log(`Config already exists: ${skillJsonPath} (left as-is).`);
   }
   console.log('Get an api key from DecorX(https://canvas.decorx.com) → Settings → API Keys.');
+} else if (cmd === 'uninstall') {
+  const keys = resolveTargets(args);
+  if (!keys.length) {
+    console.error('No agents detected on this machine. Re-run with one of: --claude, --codex, --opencode, --cursor, or --all.');
+    process.exit(1);
+  }
+
+  let removed = 0;
+  for (const k of keys) {
+    const { dest, wasRemoved } = uninstallTo(TARGETS[k].skillsDir);
+    console.log(`[${k}] ${wasRemoved ? 'Removed' : 'Not installed'} ${SKILL_NAME} -> ${dest}`);
+    if (wasRemoved) removed += 1;
+  }
+  if (removed) {
+    console.log(`Uninstalled ${SKILL_NAME} from ${removed} agent(s). (~/.decorx/skill.json left in place — delete it manually if you no longer need it.)`);
+  } else {
+    console.log(`Nothing to uninstall — ${SKILL_NAME} was not found in any target skill dir.`);
+  }
 } else {
-  console.log('Usage: decorx-skills install [--claude|--codex|--opencode|--cursor|--all]');
+  console.log('Usage: decorx-skills install   [--claude|--codex|--opencode|--cursor|--all]');
+  console.log('       decorx-skills uninstall [--claude|--codex|--opencode|--cursor|--all]');
 }

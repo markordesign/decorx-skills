@@ -1,6 +1,6 @@
 # decorx-tool (agent skill)
 
-The DecorX skill — a single, growing bundle of DecorX design capabilities. Today it supports AI interior design image generation (text-to-image and image-to-image); more capabilities will be added to this same skill over time. Works with any SKILL.md-compatible agent (Claude Code, Codex, OpenCode, Cursor, …).
+The DecorX skill — a single, growing bundle of DecorX design capabilities. Today it supports **image generation** (text-to-image & image-to-image), **room cleaning** (empty a furnished room into a bare room), and **region erase/replace** (remove or swap a named object in a photo); more capabilities will be added to this same skill over time. Works with any SKILL.md-compatible agent (Claude Code, Codex, OpenCode, Cursor, …).
 
 ## Install
 
