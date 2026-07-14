@@ -10,6 +10,11 @@ Installer for the **decorx-tool** skill — DecorX's AI design capabilities for 
 # via GitHub (no npm account needed) — auto-detects installed agents
 npx --yes github:markordesign/decorx-skills install
 
+# If the installation fails
+git clone https://github.com/markordesign/decorx-skills
+cd decorx-skills
+node bin/cli.js install
+
 # or, once published to npm:
 npx decorx-skills install
 ```
@@ -31,6 +36,11 @@ This installs the `decorx-tool` skill and creates a config template at `~/.decor
 ## Uninstall
 
 ```bash
+npx --yes github:markordesign/decorx-skills uninstall
+# or
+node bin/cli.js uninstall
+
+
 npx decorx-skills uninstall            # remove from all detected agents
 npx decorx-skills uninstall --claude   # or target one: --codex / --opencode / --cursor / --all
 ```
